@@ -1,26 +1,45 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import AuthGuard from "@/components/AuthGuard";
 import Navbar from "@/components/Navbar";
+import { getStudents } from "@/services/databaseService";
 import { useBusStore } from "@/store/useBusStore";
 
 export default function StudentsPage() {
   const studentData = useBusStore((state) => state.studentData);
   const setStudentData = useBusStore((state) => state.setStudentData);
+  const [status, setStatus] = useState("Loading students...");
 
   useEffect(() => {
-    if (!studentData) {
-      setStudentData([
-        {
-          id: "stu-1",
-          name: "Sample Student",
-          email: "student@karunya.edu",
-          busId: "bus-1",
-        },
-      ]);
-    }
-  }, [setStudentData, studentData]);
+    let isMounted = true;
+
+    const loadStudents = async () => {
+      try {
+        const students = await getStudents();
+
+        if (!isMounted) {
+          return;
+        }
+
+        setStudentData(students);
+        setStatus(students.length === 0 ? "No students found." : "");
+      } catch (error) {
+        if (!isMounted) {
+          return;
+        }
+
+        setStudentData([]);
+        setStatus(error instanceof Error ? error.message : "Unable to load students.");
+      }
+    };
+
+    void loadStudents();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [setStudentData]);
 
   return (
     <div className="min-h-screen bg-zinc-50 text-zinc-900">
@@ -29,8 +48,9 @@ export default function StudentsPage() {
         <AuthGuard>
           <h1 className="text-2xl font-semibold">Students</h1>
           <p className="mt-2 text-zinc-600">
-            Basic student list scaffold from Zustand store.
+            Student list from Supabase, synced into Zustand store.
           </p>
+          {status && <p className="mt-3 text-sm text-zinc-700">{status}</p>}
           <ul className="mt-4 space-y-2">
             {(studentData ?? []).map((student) => (
               <li

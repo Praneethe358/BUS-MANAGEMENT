@@ -1,9 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
-import { auth } from "@/lib/firebase";
+import { hasSupabaseConfig, supabase } from "@/lib/supabase";
 
 type AuthGuardProps = {
   children: React.ReactNode;
@@ -14,13 +13,41 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!auth) {
+    let isMounted = true;
+
+    if (!hasSupabaseConfig || !supabase) {
       router.replace("/login");
       return;
     }
 
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (!user) {
+    const supabaseClient = supabase;
+
+    const checkSession = async () => {
+      try {
+        const {
+          data: { session },
+          error,
+        } = await supabaseClient.auth.getSession();
+
+        if (error || !session) {
+          router.replace("/login");
+          return;
+        }
+
+        if (isMounted) {
+          setIsCheckingAuth(false);
+        }
+      } catch {
+        router.replace("/login");
+      }
+    };
+
+    void checkSession();
+
+    const {
+      data: { subscription },
+    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
         router.replace("/login");
         return;
       }
@@ -28,7 +55,10 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       setIsCheckingAuth(false);
     });
 
-    return () => unsubscribe();
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   if (isCheckingAuth) {

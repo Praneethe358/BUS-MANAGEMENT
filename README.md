@@ -8,7 +8,7 @@ Phase 1 provides the project foundation and scaffolding for a scalable bus track
 - TypeScript
 - Tailwind CSS
 - Zustand
-- Firebase (Authentication + Firestore)
+- Supabase (Auth + PostgreSQL)
 - Google Maps API (`@react-google-maps/api`)
 
 ## Implemented in Phase 1
@@ -21,9 +21,9 @@ Phase 1 provides the project foundation and scaffolding for a scalable bus track
 	- `/bus`
 	- `/students`
 - Shared navbar navigation across pages
-- Firebase initialization in `lib/firebase.ts` (env-based)
-- Basic email/password auth service
-- Firestore collection references (`students`, `buses`)
+- Supabase client initialization in `lib/supabase.ts` (env-based)
+- Supabase email/password auth service
+- Supabase table queries (`students`, `buses`)
 - Zustand global store (`selectedBus`, `studentData`, `liveLocation`)
 - Reusable Google Map component with default center
 
@@ -43,10 +43,10 @@ components/
 	MapView.tsx
 	Navbar.tsx
 lib/
-	firebase.ts
+	supabase.ts
 services/
 	authService.ts
-	firestoreService.ts
+	databaseService.ts
 store/
 	useBusStore.ts
 types/
@@ -60,16 +60,12 @@ types/
 Create `.env.local` using `.env.example`:
 
 ```bash
-NEXT_PUBLIC_FIREBASE_API_KEY=
-NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=
-NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
-NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
-NEXT_PUBLIC_FIREBASE_APP_ID=
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_ANON_KEY=
 NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
-Without Firebase/Maps keys, pages still render safely with fallback messages.
+Without Supabase/Maps keys, app initialization fails with a clear env validation error.
 
 ## Run Locally
 
@@ -90,5 +86,5 @@ Open `http://localhost:3000`.
 
 - Live tracking
 - Role-based restrictions
-- Advanced Firestore queries
+- Advanced Supabase queries
 - Production-grade UI refinements

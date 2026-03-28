@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { registerUser } from "@/services/authService";
+import { signUp } from "@/services/authService";
 
 export default function RegisterPage() {
   const [email, setEmail] = useState("");
@@ -14,8 +14,10 @@ export default function RegisterPage() {
     setStatus("Creating account...");
 
     try {
-      const user = await registerUser(email, password);
-      setStatus(`Registered as ${user.email}`);
+      const user = await signUp(email, password);
+      setStatus(
+        `Registered as ${user.email}. Please check your inbox to confirm your email before logging in.`
+      );
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Registration failed");
     }

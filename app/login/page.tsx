@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import Navbar from "@/components/Navbar";
-import { loginUser } from "@/services/authService";
+import { login } from "@/services/authService";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -14,10 +14,16 @@ export default function LoginPage() {
     setStatus("Signing in...");
 
     try {
-      const user = await loginUser(email, password);
+      const user = await login(email, password);
       setStatus(`Signed in as ${user.email}`);
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Login failed");
+      const message = error instanceof Error ? error.message : "Login failed";
+      if (message.toLowerCase().includes("email not confirmed")) {
+        setStatus("Please confirm your email before logging in. Check your inbox and spam folder.");
+        return;
+      }
+
+      setStatus(message);
     }
   };
 

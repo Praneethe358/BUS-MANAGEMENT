@@ -1,46 +1,79 @@
-import {
-  browserLocalPersistence,
-  createUserWithEmailAndPassword,
-  setPersistence,
-  signInWithEmailAndPassword,
-} from "firebase/auth";
-import { auth } from "@/lib/firebase";
+import type { Session, User } from "@supabase/supabase-js";
+import { getSupabaseClient } from "@/lib/supabase";
 
-let persistenceSetupPromise: Promise<void> | null = null;
-
-async function ensureAuthPersistence() {
-  if (!auth) {
-    throw new Error("Firebase Auth is not configured. Check environment variables.");
+function normalizeError(error: unknown, fallbackMessage: string) {
+  if (error instanceof Error && error.message) {
+    return new Error(error.message);
   }
 
-  if (!persistenceSetupPromise) {
-    persistenceSetupPromise = setPersistence(auth, browserLocalPersistence);
-  }
-
-  await persistenceSetupPromise;
-  return auth;
+  return new Error(fallbackMessage);
 }
 
-export async function registerUser(email: string, password: string) {
+export async function signUp(email: string, password: string): Promise<User> {
   try {
-    const authInstance = await ensureAuthPersistence();
-    const credential = await createUserWithEmailAndPassword(authInstance, email, password);
-    return credential.user;
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.user) {
+      throw new Error("Unable to register user at this time.");
+    }
+
+    return data.user;
   } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Unable to register user at this time."
-    );
+    throw normalizeError(error, "Unable to register user at this time.");
   }
 }
 
-export async function loginUser(email: string, password: string) {
+export async function login(email: string, password: string): Promise<User> {
   try {
-    const authInstance = await ensureAuthPersistence();
-    const credential = await signInWithEmailAndPassword(authInstance, email, password);
-    return credential.user;
+    const supabase = getSupabaseClient();
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    if (error) {
+      throw error;
+    }
+
+    if (!data.user) {
+      throw new Error("Unable to login at this time.");
+    }
+
+    return data.user;
   } catch (error) {
-    throw new Error(
-      error instanceof Error ? error.message : "Unable to login at this time."
-    );
+    throw normalizeError(error, "Unable to login at this time.");
+  }
+}
+
+export async function logout(): Promise<void> {
+  try {
+    const supabase = getSupabaseClient();
+    const { error } = await supabase.auth.signOut();
+
+    if (error) {
+      throw error;
+    }
+  } catch (error) {
+    throw normalizeError(error, "Unable to logout at this time.");
+  }
+}
+
+export async function getSession(): Promise<Session | null> {
+  try {
+    const supabase = getSupabaseClient();
+    const {
+      data: { session },
+      error,
+    } = await supabase.auth.getSession();
+
+    if (error) {
+      throw error;
+    }
+
+    return session;
+  } catch (error) {
+    throw normalizeError(error, "Unable to read user session.");
   }
 }
