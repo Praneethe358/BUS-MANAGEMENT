@@ -53,7 +53,7 @@ export default function LeafletMapClient({ center, zoom = 13 }: MapViewProps) {
   }
 
   return (
-    <div className="h-[400px] w-full rounded-xl">
+    <div className="h-100 w-full rounded-xl">
       <MapContainer
         center={[safeCenter.lat, safeCenter.lng]}
         zoom={zoom}
