@@ -1,5 +1,4 @@
 # Karunya Bus Tracking App – Phase 1
-
 Phase 1 provides the project foundation and scaffolding for a scalable bus tracking app.
 
 ## Tech Stack
@@ -9,7 +8,7 @@ Phase 1 provides the project foundation and scaffolding for a scalable bus track
 - Tailwind CSS
 - Zustand
 - Supabase (Auth + PostgreSQL)
-- Google Maps API (`@react-google-maps/api`)
+- Leaflet (`leaflet`, `react-leaflet`)
 
 ## Implemented in Phase 1
 
@@ -20,12 +19,12 @@ Phase 1 provides the project foundation and scaffolding for a scalable bus track
 	- `/dashboard`
 	- `/bus`
 	- `/students`
-- Shared navbar navigation across pages
+- Shared navbar navigation across pages 
 - Supabase client initialization in `lib/supabase.ts` (env-based)
 - Supabase email/password auth service
 - Supabase table queries (`students`, `buses`)
 - Zustand global store (`selectedBus`, `studentData`, `liveLocation`)
-- Reusable Google Map component with default center
+- Reusable Leaflet component with default center and marker
 
 ## Project Structure
 
@@ -62,10 +61,9 @@ Create `.env.local` using `.env.example`:
 ```bash
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
-Without Supabase/Maps keys, app initialization fails with a clear env validation error.
+Without Supabase keys, app initialization fails with a clear env validation error.
 
 ## Run Locally
 

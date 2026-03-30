@@ -8,7 +8,7 @@ export default function Home() {
         <h1 className="text-2xl font-semibold">Karunya Bus Tracking App</h1>
         <p className="mt-2 text-zinc-600">
           Phase 1 foundation is set up with page scaffolding, Supabase,
-          Zustand, and Google Maps integration.
+          Zustand, and Leaflet integration.
         </p>
       </main>
     </div>
