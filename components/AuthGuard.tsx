@@ -21,38 +21,59 @@ export default function AuthGuard({ children }: AuthGuardProps) {
     }
 
     const supabaseClient = supabase;
+    const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-    const checkSession = async () => {
+    const checkAuth = async () => {
       try {
-        const {
-          data: { session },
-          error,
-        } = await supabaseClient.auth.getSession();
+        for (let attempt = 0; attempt < 4; attempt += 1) {
+          const {
+            data: { session },
+            error,
+          } = await supabaseClient.auth.getSession();
 
-        if (error || !session) {
-          router.replace("/login");
-          return;
+          if (!error && session?.user) {
+            if (isMounted) {
+              setIsCheckingAuth(false);
+            }
+            return;
+          }
+
+          const {
+            data: { user },
+            error: userError,
+          } = await supabaseClient.auth.getUser();
+
+          if (!userError && user) {
+            if (isMounted) {
+              setIsCheckingAuth(false);
+            }
+            return;
+          }
+
+          if (attempt < 3) {
+            await sleep(350);
+          }
         }
 
-        if (isMounted) {
-          setIsCheckingAuth(false);
-        }
+        router.replace("/login");
       } catch {
         router.replace("/login");
       }
     };
 
-    void checkSession();
+    void checkAuth();
 
     const {
       data: { subscription },
-    } = supabaseClient.auth.onAuthStateChange((_event, session) => {
-      if (!session) {
+    } = supabaseClient.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
         router.replace("/login");
         return;
       }
 
-      setIsCheckingAuth(false);
+      if (session?.user && isMounted) {
+        setIsCheckingAuth(false);
+      }
     });
 
     return () => {

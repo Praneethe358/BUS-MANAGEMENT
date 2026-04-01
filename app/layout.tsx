@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Karunya Bus Tracking App",
-  description: "Phase 1 foundation scaffolding",
+  title: "Tracker - Karunya Bus Tracking",
+  description: "Live bus tracking and geolocation updates.",
 };
 
 export default function RootLayout({
@@ -28,7 +28,11 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-zinc-50 text-zinc-950">
+        <div className="flex min-h-screen flex-col">
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

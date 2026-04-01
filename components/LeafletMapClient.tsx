@@ -1,8 +1,8 @@
 "use client";
 
 import L, { type LeafletEventHandlerFnMap } from "leaflet";
-import { useMemo, useState } from "react";
-import { MapContainer, Marker, Popup, TileLayer, ZoomControl } from "react-leaflet";
+import { useEffect, useMemo, useState } from "react";
+import { MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from "react-leaflet";
 import type { MapViewProps } from "./MapView";
 
 const defaultCenter = {
@@ -28,7 +28,20 @@ function MapFallback() {
   );
 }
 
-export default function LeafletMapClient({ center, zoom = 13 }: MapViewProps) {
+function RecenterOnUpdate({ center }: { center: { lat: number; lng: number } }) {
+  const map = useMap();
+
+  useEffect(() => {
+    map.flyTo([center.lat, center.lng], map.getZoom(), {
+      animate: true,
+      duration: 1,
+    });
+  }, [center.lat, center.lng, map]);
+
+  return null;
+}
+
+export default function LeafletMapClient({ center, zoom = 13, markerLabel, customPopup }: MapViewProps) {
   const [mapFailed, setMapFailed] = useState(false);
 
   const safeCenter = useMemo(
@@ -53,13 +66,14 @@ export default function LeafletMapClient({ center, zoom = 13 }: MapViewProps) {
   }
 
   return (
-    <div className="h-100 w-full rounded-xl">
+    <div className="h-full w-full rounded-xl">
       <MapContainer
         center={[safeCenter.lat, safeCenter.lng]}
         zoom={zoom}
         zoomControl={false}
-        className="h-full w-full"
+        className="h-full w-full relative z-0"
       >
+        <RecenterOnUpdate center={safeCenter} />
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -67,7 +81,7 @@ export default function LeafletMapClient({ center, zoom = 13 }: MapViewProps) {
         />
         <ZoomControl position="topright" />
         <Marker position={[safeCenter.lat, safeCenter.lng]} icon={markerIcon}>
-          <Popup>Karunya University</Popup>
+          <Popup>{customPopup ? customPopup : (markerLabel ?? "Live bus location")}</Popup>
         </Marker>
       </MapContainer>
     </div>

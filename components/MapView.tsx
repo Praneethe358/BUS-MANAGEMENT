@@ -8,6 +8,8 @@ type MapViewProps = {
     lng: number;
   };
   zoom?: number;
+  markerLabel?: string;
+  customPopup?: React.ReactNode;
 };
 
 function MapFallback() {

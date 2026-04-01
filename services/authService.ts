@@ -37,7 +37,7 @@ export async function login(email: string, password: string): Promise<User> {
       throw error;
     }
 
-    if (!data.user) {
+    if (!data.user || !data.session) {
       throw new Error("Unable to login at this time.");
     }
 
